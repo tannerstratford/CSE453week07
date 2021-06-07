@@ -79,8 +79,8 @@ void two(long number)              // 345678
    
    long bow = number + 111111;     // 456789
    char text[8] = "**TWO**";
-   long * pLong = NULL;
-   char * pChar = NULL;
+   long * pLong = &bow;
+   char * pChar = &text[8];
 
    // header for our table. Use these setw() offsets in your table
    cout << '[' << setw(2) << 'i' << ']'
@@ -94,13 +94,18 @@ void two(long number)              // 345678
         << "-------------------+"
         << "-------------------+"
         << "-----------------+\n";
-   for (long i = 24; i >= -4; i--)   // You may need to change 24 to another number
+   std::ios oldState(nullptr);  // These two lines right here may be affecting the results since it is adding 2 local variables to the stack. 
+   oldState.copyfmt(std::cout); // I couldn't find a cleaner way to convert from hexadecimal back to decimal Also the reason I changed the 
+                                // loop starting and end conditions from (start=24, end=-4) to (start=26, end=-2)
+   for (long i = 26; i >= -2; i--)   // You may need to change 24 to another number
    {
-      cout << '[' << setw(2) << i << ']'
-        << setw(15) << (2 * i) + &bow
-        << setw(20) << "hexadecimal"
-        << setw(20) << *((2 * i) + &bow)
-        << setw(18) << displayCharArray
+      std::cout << '[' << setw(2) << i << ']'
+        << setw(15) << (2 * i) + pLong
+        << setw(20) << std::hex << *((2 * i) + pLong); //std::hex converts the decimal to hexadecimal
+      std::cout.copyfmt(oldState);                     //This line right here converts it back from hexadecimal to decimal, and relies
+                                                       //on the two lines that I mentioned above.
+      std::cout << setw(20) << *((2 * i) + pLong)
+        << setw(18) << displayCharArray((8*i) + pChar)
         << endl;
    }
 
@@ -108,8 +113,11 @@ void two(long number)              // 345678
    // Insert code here to change the variables in main()
                                                                                 
    // change text in main() to "*main**"
+   *((2 * 18) + pLong + 1) = //Something... Need to figure out how to get long value of *main**;
+  
 
    // change number in main() to 654321
+   *((2 * 20) + pLong + 1) = 654321;
 
    // change pointerFunction in main() to point to pass
 
